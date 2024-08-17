@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+#  atm-terminal:
+#    image: atm-terminal-image
+#    container_name: atm-terminal
+#    ports:
+#      - "8080:8080"  # Adjust the ports as necessary
+#    environment:
+#      - ENV_VAR_NAME=value  # Add any required environment variables
+#    networks:
+#      - app-network
+#    depends_on:
+#      - gps-server
+#      - atm-gate-next
+#      - dhi-server-next
+#
+  gps-server:
+    image: ghcr.io/internationalsmartcard/gps-server-next:sit
+    container_name: gps-server
+    ports:
+      - "9090:9090"  # Adjust the ports as necessary
+    environment:
+      - terminal_port=8001
+      - atm_gate_ip=atm-gate-next
+      - atm_gate_port=10000  # Add any required environment variables
+    networks:
+      - app-network
+
+  atm-gate-next:
+    image: ghcr.io/internationalsmartcard/atm-gate-next:sit
+    container_name: atm-gate-next
+    ports:
+      - "7070:7070"  # Adjust the ports as necessary
+    environment:
+      - dhi_ip_secondary=dhi-server-next
+      - dhi_ip_primary=dhi-server-next
+      - dhi_port_primary=7060
+      - dhi_port_secondary=7060
+      - dhi_ip=dhi-server-next
+      - dhi_port=7060
+    networks:
+      - app-network
+
+  dhi-server-next:
+    image: ghcr.io/internationalsmartcard/dhi-server-next:sit
+    container_name: dhi-server-next
+    ports:
+      - "6060:6060"  # Adjust the ports as necessary
+    environment:
+      - atm-gate-port=7060  # Add any required environment variables
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
